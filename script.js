@@ -185,7 +185,7 @@ class AetherAI {
                     "X-Title": "AetherAI"
                 },
                 body: JSON.stringify({
-                    "model": "google/gemini-2.0-flash-001", // Premium fast model
+                    "model": "openai/gpt-3.5-turbo", 
                     "messages": [
                         {"role": "system", "content": "You are AetherAI, a sophisticated and helpful AI assistant. Keep responses professional, creative, and concise."},
                         ...this.chatHistory.filter(m => !m.isImage).slice(-5).map(m => ({
@@ -208,7 +208,7 @@ class AetherAI {
             this.addMessage('bot', botResponse);
         } catch (error) {
             console.error("OpenRouter Error:", error);
-            this.addMessage('bot', `Connection failed: ${error.message || 'Check your internet and API key.'}`);
+            this.addMessage('bot', `Nexus Connection Error: ${error.message || 'Please check your OpenRouter key.'}`);
         } finally {
             this.showTyping(false);
         }
@@ -227,13 +227,16 @@ class AetherAI {
                 }
             );
 
-            if (!response.ok) throw new Error("Image generation failed");
+            if (!response.ok) {
+                const errData = await response.json().catch(() => ({}));
+                throw new Error(errData.error || "Image API rejected the request. Check your Hugging Face key.");
+            }
 
             const blob = await response.blob();
             await this.addMessage('bot', blob, true);
         } catch (error) {
             console.error("Hugging Face Error:", error);
-            this.addMessage('bot', "Could not materialize the image. Ensure your Hugging Face key is valid.");
+            this.addMessage('bot', `Canvas Error: ${error.message}`);
         } finally {
             this.showTyping(false);
         }
