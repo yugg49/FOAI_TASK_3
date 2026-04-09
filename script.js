@@ -219,7 +219,7 @@ class AetherAI {
         
         try {
             const response = await fetch(
-                "https://api-inference.huggingface.co/models/stabilityai/stable-diffusion-xl-base-1.0",
+                "https://api-inference.huggingface.co/models/stabilityai/stable-diffusion-2-1",
                 {
                     headers: { 
                         "Authorization": `Bearer ${this.config.huggingFaceKey}`,
@@ -232,14 +232,20 @@ class AetherAI {
 
             if (!response.ok) {
                 const errData = await response.json().catch(() => ({}));
-                throw new Error(errData.error || "Image API rejected the request. Check your Hugging Face key.");
+                throw new Error(errData.error || `Image API rejected the request (Status ${response.status}).`);
             }
 
             const blob = await response.blob();
             await this.addMessage('bot', blob, true);
         } catch (error) {
             console.error("Hugging Face Error:", error);
-            this.addMessage('bot', `Canvas Error: ${error.message}`);
+            
+            let errorMessage = error.message;
+            if (window.location.protocol === 'file:' && (error.message.includes('fetch') || error.message.includes('NetworkError'))) {
+                errorMessage = "Browser Security Block: Because you are opening this file directly (file://), your browser is blocking the image generation. Please run a local server (e.g., python3 -m http.server) to fix this.";
+            }
+            
+            this.addMessage('bot', `Canvas Error: ${errorMessage}`);
         } finally {
             this.showTyping(false);
         }
