@@ -159,21 +159,27 @@ class AetherAI {
         const messageDiv = document.createElement('div');
         messageDiv.className = `message ${msg.role}`;
         
-        let contentHtml = '';
+        let contentHtml = msg.content;
+
+        // 1. Handle Markdown Images: ![alt](url)
+        const mdImageRegex = /!\[([^\]]*)\]\((https?:\/\/[^\s)]+)\)/g;
+        contentHtml = contentHtml.replace(mdImageRegex, (match, alt, url) => {
+            return `<img src="${url}" class="message-image" alt="${alt || 'AI Art'}" onerror="this.outerHTML='[Image failed to load]'">`;
+        });
+
+        // 2. Handle raw Base64 or stand-alone Image URLs
         const isBase64 = typeof msg.content === 'string' && msg.content.startsWith('data:image');
-        const isImageUrl = typeof msg.content === 'string' && (msg.content.match(/\.(jpeg|jpg|gif|png|webp)$/) != null || msg.content.includes('blob:'));
+        const isImageUrl = typeof msg.content === 'string' && (msg.content.match(/\.(jpeg|jpg|gif|png|webp|svg)$/i) != null || msg.content.includes('blob:'));
 
         if (msg.isImage || isBase64 || isImageUrl) {
-            contentHtml = `<div class="bubble">
-                <p>Generated Art:</p>
-                <img src="${msg.content}" class="message-image" alt="AI Art" onerror="this.parentElement.innerHTML='Failed to load image.'">
-            </div>`;
-        } else {
-            contentHtml = `<div class="bubble">${msg.content}</div>`;
+            // If it's pure image data and hasn't been wrapped yet, wrap it
+            if (!contentHtml.includes('<img')) {
+                contentHtml = `<img src="${msg.content}" class="message-image" alt="AI Art">`;
+            }
         }
-        
+
         messageDiv.innerHTML = `
-            ${contentHtml}
+            <div class="bubble">${contentHtml}</div>
             <div class="timestamp">${msg.timestamp}</div>
         `;
         
