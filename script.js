@@ -132,11 +132,15 @@ class AetherAI {
         
         // Handle image persistence
         let finalContent = content;
+        let finalIsImage = isImage;
+        
         if (isImage && content instanceof Blob) {
             finalContent = await this.blobToBase64(content);
+        } else if (typeof content === 'string' && content.startsWith('data:image')) {
+            finalIsImage = true;
         }
 
-        const messageObj = { role, content: finalContent, isImage, timestamp };
+        const messageObj = { role, content: finalContent, isImage: finalIsImage, timestamp };
         
         this.chatHistory.push(messageObj);
         this.saveHistory();
@@ -155,12 +159,17 @@ class AetherAI {
         const messageDiv = document.createElement('div');
         messageDiv.className = `message ${msg.role}`;
         
-        let contentHtml = `<div class="bubble">${msg.content}</div>`;
-        if (msg.isImage) {
+        let contentHtml = '';
+        const isBase64 = typeof msg.content === 'string' && msg.content.startsWith('data:image');
+        const isImageUrl = typeof msg.content === 'string' && (msg.content.match(/\.(jpeg|jpg|gif|png|webp)$/) != null || msg.content.includes('blob:'));
+
+        if (msg.isImage || isBase64 || isImageUrl) {
             contentHtml = `<div class="bubble">
-                <p>Generating your masterpiece...</p>
-                <img src="${msg.content}" class="message-image" alt="Generated AI Art" onload="this.previousElementSibling.remove()">
+                <p>Generated Art:</p>
+                <img src="${msg.content}" class="message-image" alt="AI Art" onerror="this.parentElement.innerHTML='Failed to load image.'">
             </div>`;
+        } else {
+            contentHtml = `<div class="bubble">${msg.content}</div>`;
         }
         
         messageDiv.innerHTML = `
