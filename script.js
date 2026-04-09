@@ -190,11 +190,17 @@ class AetherAI {
             });
 
             const data = await response.json();
+            
+            if (data.error) {
+                this.addMessage('bot', `Nexus Error: ${data.error.message || 'Unknown provider error'}`);
+                return;
+            }
+
             const botResponse = data.choices?.[0]?.message?.content || "I'm having trouble connecting to the nexus right now.";
             this.addMessage('bot', botResponse);
         } catch (error) {
             console.error("OpenRouter Error:", error);
-            this.addMessage('bot', "Expansion failed. Please check your connection and API key.");
+            this.addMessage('bot', `Connection failed: ${error.message || 'Check your internet and API key.'}`);
         } finally {
             this.showTyping(false);
         }
