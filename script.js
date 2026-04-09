@@ -217,38 +217,52 @@ class AetherAI {
     async generateImageResponse(prompt) {
         this.showTyping(true, "Aether is painting...");
         
-        try {
-            const response = await fetch(
-                "https://api-inference.huggingface.co/models/stabilityai/stable-diffusion-2-1",
-                {
-                    headers: { 
-                        "Authorization": `Bearer ${this.config.huggingFaceKey}`,
-                        "Content-Type": "application/json"
-                    },
-                    method: "POST",
-                    body: JSON.stringify({ inputs: prompt }),
+        const models = [
+            "stabilityai/stable-diffusion-2-1",
+            "runwayml/stable-diffusion-v1-5"
+        ];
+
+        let lastError = null;
+
+        for (const model of models) {
+            try {
+                const response = await fetch(
+                    `https://api-inference.huggingface.co/models/${model}`,
+                    {
+                        headers: { 
+                            "Authorization": `Bearer ${this.config.huggingFaceKey}`,
+                            "Content-Type": "application/json",
+                            "x-wait-for-model": "true"
+                        },
+                        method: "POST",
+                        body: JSON.stringify({ inputs: prompt }),
+                    }
+                );
+
+                if (!response.ok) {
+                    const errData = await response.json().catch(() => ({}));
+                    throw new Error(errData.error || `Model ${model} rejected the request.`);
                 }
-            );
 
-            if (!response.ok) {
-                const errData = await response.json().catch(() => ({}));
-                throw new Error(errData.error || `Image API rejected the request (Status ${response.status}).`);
+                const blob = await response.blob();
+                await this.addMessage('bot', blob, true);
+                this.showTyping(false);
+                return; // Success!
+            } catch (error) {
+                console.error(`Error with model ${model}:`, error);
+                lastError = error;
+                // Continue to next model
             }
-
-            const blob = await response.blob();
-            await this.addMessage('bot', blob, true);
-        } catch (error) {
-            console.error("Hugging Face Error:", error);
-            
-            let errorMessage = error.message;
-            if (window.location.protocol === 'file:' && (error.message.includes('fetch') || error.message.includes('NetworkError'))) {
-                errorMessage = "Browser Security Block: Because you are opening this file directly (file://), your browser is blocking the image generation. Please run a local server (e.g., python3 -m http.server) to fix this.";
-            }
-            
-            this.addMessage('bot', `Canvas Error: ${errorMessage}`);
-        } finally {
-            this.showTyping(false);
         }
+
+        // if we get here, all models failed
+        let errorMessage = lastError.message;
+        if (errorMessage.includes('fetch') || errorMessage.includes('NetworkError')) {
+            errorMessage = "Connection Blocked: Your browser or an AdBlocker is preventing the connection to Hugging Face. Please try disabling any AdBlockers or VPNs and try again.";
+        }
+        
+        this.addMessage('bot', `Canvas Error: ${errorMessage}`);
+        this.showTyping(false);
     }
 
     showTyping(show, text = "Aether is thinking...") {
