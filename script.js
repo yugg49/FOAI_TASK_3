@@ -94,7 +94,15 @@ class AetherAI {
         this.userInput.style.height = 'auto';
         this.addMessage('user', text);
         
-        await this.generateTextResponse(text);
+        // Smart Intent Detection: If the user asks for an image/photo via the send button, redirect to image gen
+        const imageKeywords = ['generate image', 'create image', 'photo of', 'picture of', 'draw', 'paint', 'image of', 'give me a photo'];
+        const isRequestingImage = imageKeywords.some(keyword => text.toLowerCase().includes(keyword));
+
+        if (isRequestingImage) {
+            await this.generateImageResponse(text);
+        } else {
+            await this.generateTextResponse(text);
+        }
     }
 
     async handleGenerateImage() {
