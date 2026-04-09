@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AetherAI | Next-Gen AI Assistant</title>
+    <meta name="description" content="Experience the future with AetherAI - a premium chatbot for text and image generation.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="dark-theme">
+    <div class="app-container">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="logo">
+                <div class="logo-icon"><i class="fas fa-atom"></i></div>
+                <h1>Aether<span>AI</span></h1>
+            </div>
+            <div class="header-actions">
+                <button id="theme-toggle" class="icon-btn" title="Toggle Theme">
+                    <i class="fas fa-moon"></i>
+                </button>
+                <button id="clear-chat" class="icon-btn" title="Clear Chat">
+                    <i class="fas fa-trash-alt"></i>
+                </button>
+                <button id="settings-btn" class="icon-btn" title="API Settings">
+                    <i class="fas fa-cog"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Chat Area -->
+        <main class="chat-container" id="chat-history">
+            <div class="welcome-screen">
+                <div class="welcome-card">
+                    <h2>Welcome to AetherAI</h2>
+                    <p>Your intelligent companion for text generation and high-quality image creation.</p>
+                    <div class="suggestions">
+                        <button class="suggest-btn">"Write a futuristic story about Mars colonies."</button>
+                        <button class="suggest-btn">"Generate an image of a cyberpunk city at night."</button>
+                    </div>
+                </div>
+            </div>
+            <!-- Messages will be injected here -->
+        </main>
+
+        <!-- Typing Indicator -->
+        <div id="typing-indicator" class="typing-indicator hidden">
+            <span></span>
+            <span></span>
+            <span></span>
+            <p>Aether is thinking...</p>
+        </div>
+
+        <!-- Input Area -->
+        <footer class="input-area">
+            <div class="input-wrapper">
+                <textarea id="user-input" placeholder="Type a message or image prompt..." rows="1"></textarea>
+                <div class="action-buttons">
+                    <button id="generate-image-btn" class="action-btn secondary" title="Generate Image">
+                        <i class="fas fa-image"></i>
+                        <span>Generate Image</span>
+                    </button>
+                    <button id="send-btn" class="action-btn primary" title="Send Message">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="settings-modal" class="modal hidden">
+        <div class="modal-content glass">
+            <div class="modal-header">
+                <h3><i class="fas fa-key"></i> API Configuration</h3>
+                <button id="close-settings" class="close-btn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>To use AetherAI, please provide your API keys. These are stored locally in your browser.</p>
+                <div class="input-group">
+                    <label for="openrouter-key">OpenRouter API Key (Text)</label>
+                    <input type="password" id="openrouter-key" placeholder="sk-or-v1-...">
+                    <small>Get one at <a href="https://openrouter.ai/" target="_blank">openrouter.ai</a></small>
+                </div>
+                <div class="input-group">
+                    <label for="huggingface-key">Hugging Face API Key (Images)</label>
+                    <input type="password" id="huggingface-key" placeholder="hf_...">
+                    <small>Get one at <a href="https://huggingface.co/settings/tokens" target="_blank">huggingface.co</a></small>
+                </div>
+                <button id="save-settings" class="save-btn">Save Configuration</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
